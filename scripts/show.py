@@ -13,7 +13,7 @@ def main():
     test(len(sys.argv) == 2, "please pass account name")
     accout = sys.argv[1]
 
-    password_path = path.join(path.dirname(__file__), "password")
+    password_path = "data/password" 
     test(path.exists(password_path), "cannot find password file")
 
     for line in open(password_path).readlines():

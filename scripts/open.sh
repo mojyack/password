@@ -13,7 +13,7 @@ gpg -q -d $SAVENAME | tar x
 echo "opened"
 read
 mv $SAVENAME $SAVENAME.bak
-tar c data | gpg -e -r mojyack -o $SAVENAME
+tar c data | gpg -e -r mojyack@gmail.com -o $SAVENAME
 find data -type f -exec shred -u {} +
 rm -r data
 echo "closed"

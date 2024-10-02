@@ -27,6 +27,10 @@ cp "$key_file" .
 ssh-keygen -p -f "${key_file:t}" -e -m pem -N "" > /dev/null
 openssl pkeyutl -decrypt -inkey "${key_file:t}" < $basedir/nonce.enc > nonce
 openssl aes-256-cbc -pbkdf2 -d -pass file:nonce < $basedir/data.enc | tar x
+if [[ $rw == 1 ]]; then
+    "$basedir/scripts/forget.sh" data.enc
+    "$basedir/scripts/forget.sh" nonce.enc
+fi
 if [[ $rw != 1 ]]; then
     chmod -R -w .
 fi

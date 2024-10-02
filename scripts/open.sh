@@ -24,10 +24,6 @@ mkdir -p -m 700 "$tmpdir"
 ssh-keygen -p -f "$key_file" -e -m pem -N "" > /dev/null
 openssl pkeyutl -decrypt -inkey "$key_file" < $basedir/nonce.enc > $tmpdir/nonce
 openssl aes-256-cbc -pbkdf2 -d -pass "file:$tmpdir/nonce" < $basedir/data.enc | tar -C "$tmpdir" -x
-if [[ $rw == 1 ]]; then
-    "$basedir/scripts/forget.sh" data.enc
-    "$basedir/scripts/forget.sh" nonce.enc
-fi
 if [[ $rw != 1 ]]; then
     # prohibit writing to database if opened as ro
     chmod -R -w "$tmpdir"
@@ -39,6 +35,10 @@ rm "$basedir/data"
 
 # encrypt if rw
 if [[ $rw == 1 ]]; then
+    # remove database file from history before modifying
+    "$basedir/scripts/forget.sh" data.enc
+    "$basedir/scripts/forget.sh" nonce.enc
+
     openssl rand 32 > $tmpdir/nonce
     tar -C "$tmpdir" -c data | openssl enc -aes-256-cbc -pbkdf2 -pass "file:$tmpdir/nonce" > $basedir/data.enc
     openssl pkeyutl -encrypt -pubin -inkey <(ssh-keygen -e -f "$key_file.pub" -m PKCS8) < $tmpdir/nonce > $basedir/nonce.enc

@@ -20,19 +20,18 @@ fi
 # setup
 mkdir -p "$tmpdir"
 chmod 700 "$tmpdir"
-pushd "$tmpdir"
 
 # dec
 cp "$key_file" .
 ssh-keygen -p -f "${key_file:t}" -e -m pem -N "" > /dev/null
-openssl pkeyutl -decrypt -inkey "${key_file:t}" < $basedir/nonce.enc > nonce
-openssl aes-256-cbc -pbkdf2 -d -pass file:nonce < $basedir/data.enc | tar x
+openssl pkeyutl -decrypt -inkey "${key_file:t}" < $basedir/nonce.enc > $tmpdir/nonce
+openssl aes-256-cbc -pbkdf2 -d -pass "file:$tmpdir/nonce" < $basedir/data.enc | tar -C "$tmpdir" -x
 if [[ $rw == 1 ]]; then
     "$basedir/scripts/forget.sh" data.enc
     "$basedir/scripts/forget.sh" nonce.enc
 fi
 if [[ $rw != 1 ]]; then
-    chmod -R -w .
+    chmod -R -w "$tmpdir"
 fi
 
 ln -s "$tmpdir/data" "$basedir/data"
@@ -42,14 +41,13 @@ rm "$basedir/data"
 
 # enc
 if [[ $rw == 1 ]]; then
-    openssl rand 32 > nonce
-    tar -c data | openssl enc -aes-256-cbc -pbkdf2 -pass file:nonce > $basedir/data.enc
-    openssl pkeyutl -encrypt -pubin -inkey <(ssh-keygen -e -f "$key_file.pub" -m PKCS8) < nonce > $basedir/nonce.enc
+    openssl rand 32 > $tmpdir/nonce
+    tar -C "$tmpdir" -c data | openssl enc -aes-256-cbc -pbkdf2 -pass "file:$tmpdir/nonce" > $basedir/data.enc
+    openssl pkeyutl -encrypt -pubin -inkey <(ssh-keygen -e -f "$key_file.pub" -m PKCS8) < $tmpdir/nonce > $basedir/nonce.enc
 fi
 
 # cleanup
-chmod -R +w .
-popd
+chmod -R +w "$tmpdir"
 rm -rf "$tmpdir"
 echo "bye"
 

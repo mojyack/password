@@ -22,9 +22,8 @@ mkdir -p "$tmpdir"
 chmod 700 "$tmpdir"
 
 # dec
-cp "$key_file" .
-ssh-keygen -p -f "${key_file:t}" -e -m pem -N "" > /dev/null
-openssl pkeyutl -decrypt -inkey "${key_file:t}" < $basedir/nonce.enc > $tmpdir/nonce
+ssh-keygen -p -f "$key_file" -e -m pem -N "" > /dev/null
+openssl pkeyutl -decrypt -inkey "$key_file" < $basedir/nonce.enc > $tmpdir/nonce
 openssl aes-256-cbc -pbkdf2 -d -pass "file:$tmpdir/nonce" < $basedir/data.enc | tar -C "$tmpdir" -x
 if [[ $rw == 1 ]]; then
     "$basedir/scripts/forget.sh" data.enc

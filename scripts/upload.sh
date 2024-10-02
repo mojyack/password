@@ -3,7 +3,7 @@
 set -e
 
 # remove previous update commit
-target_hash=$(git log --oneline --grep="$1" | cut -d ' ' -f 1 "database update")
+target_hash=$(git log --oneline --grep="database update" | cut -d ' ' -f 1)
 git rebase --onto "$target_hash^" "$target_hash"
 
 # commit database files

@@ -2,15 +2,12 @@
 
 set -e
 
-find_commit() {
-    git log --oneline --grep="$1" | cut -d ' ' -f 1
-}
+# remove previous update commit
+target_hash=$(git log --oneline --grep="$1" | cut -d ' ' -f 1 "database update")
+git rebase --onto "$target_hash^" "$target_hash"
 
-export GIT_EDITOR=true
+# commit database files
 git add *.enc
-git commit --fixup=$(find_commit "database update")
-git rebase -i --autosquash $(find_commit "initial commit")
-git reflog expire --expire=now --expire-unreachable=now --all
-git repack -a -d
+git commit -m "database update $(date '+%Y-%m-%d %H:%M')"
 
 git push -f

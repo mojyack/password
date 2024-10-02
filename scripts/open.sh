@@ -13,6 +13,10 @@ if [[ -e data ]] {
     exit 0
 }
 
+if [[ $rw == 1 ]]; then
+    "$basedir/scripts/download.sh"
+fi
+
 # setup
 mkdir -p "$tmpdir"
 chmod 700 "$tmpdir"
@@ -44,3 +48,7 @@ chmod -R +w .
 popd
 rm -rf "$tmpdir"
 echo "bye"
+
+if [[ $rw == 1 ]]; then
+    "$basedir/scripts/upload.sh"
+fi

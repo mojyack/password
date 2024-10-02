@@ -11,4 +11,9 @@ git commit -a --fixup=$(find_commit "database update")
 git rebase -i --autosquash $(find_commit "initial commit")
 git reflog expire --expire=now --expire-unreachable=now --all
 git repack -a -d
-git push -f
+
+remote="git@github.com:mojyack/password.git"
+branch="openssl-reset"
+git remote add origin "$remote"
+git branch -M "$branch"
+git push -f -u origin "$branch"
